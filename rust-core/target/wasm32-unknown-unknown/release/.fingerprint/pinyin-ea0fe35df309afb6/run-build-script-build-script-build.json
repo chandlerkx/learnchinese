@@ -1,0 +1,1 @@
+{"rustc":18415816196306954164,"features":"","declared_features":"","target":0,"profile":0,"path":0,"deps":[[10854948202637127381,"build_script_build",false,16134755391268173180]],"local":[{"RerunIfChanged":{"output":"wasm32-unknown-unknown/release/build/pinyin-ea0fe35df309afb6/output","paths":["build.rs"]}}],"rustflags":[],"config":0,"compile_kind":0}
