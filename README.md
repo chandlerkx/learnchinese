@@ -1,1 +1,1 @@
-chrome extension pinyin translator
+chrome extension pinyin translator overlay
