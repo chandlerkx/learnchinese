@@ -45,8 +45,36 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             sendResponse(response);
         });
         return true;
+    } else if (request.type === 'FETCH_DEFINITION') {
+        fetchDefinition(request.word).then(sendResponse);
+        return true; // Keep channel open for async fetch
     }
 });
+
+// Simple cache to prevent spamming the translation API for the same words
+const definitionCache = new Map();
+
+async function fetchDefinition(word) {
+    if (definitionCache.has(word)) {
+        return { definition: definitionCache.get(word) };
+    }
+
+    try {
+        // Use Google Translate's free backend API (used natively by Chrome)
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-CN&tl=en&dt=t&q=${encodeURIComponent(word)}`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Network response was not ok');
+        
+        const data = await response.json();
+        const englishTranslation = data[0][0][0]; // Deep pluck the translated string
+        
+        definitionCache.set(word, englishTranslation);
+        return { definition: englishTranslation };
+    } catch (error) {
+        console.error("Translation error:", error);
+        return { error: error.toString() };
+    }
+}
 
 // Self-test / Verification Log
 console.log("Background service worker loaded.");

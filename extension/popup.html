@@ -6,7 +6,7 @@
     <title>Learn Chinese Overlay</title>
     <style>
         body {
-            width: 480px; /* Much wider for landscape layout */
+            width: 580px; /* Expand to accommodate 3 spacious columns */
             font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             margin: 0;
             padding: 20px 24px;
@@ -42,7 +42,7 @@
         
         .layout-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(3, 1fr);
             gap: 16px;
         }
 
@@ -55,7 +55,6 @@
             border-radius: 12px;
             border: none;
             transition: background 0.2s ease;
-            margin-bottom: 0; /* Remove bottom margin since we are using grid gap */
         }
 
         .toggle-container:hover {
@@ -66,6 +65,17 @@
             font-size: 14px;
             font-weight: 600;
             color: #374151;
+            white-space: nowrap;
+        }
+        
+        .state-text {
+            font-weight: 800;
+            transition: color 0.2s ease;
+            margin-left: 4px;
+        }
+        
+        .state-text.active {
+            color: #ef4444;
         }
 
         .switch {
@@ -131,6 +141,25 @@
             font-size: 13px;
             font-weight: 600;
             color: #4b5563;
+        }
+
+        /* Styling for the dropdown select */
+        select.dropdown {
+            margin-top: 4px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            background-color: white;
+            font-family: inherit;
+            font-size: 13px;
+            color: #374151;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        select.dropdown:focus {
+            border-color: #ef4444;
         }
         
         .slider-container {
@@ -213,17 +242,23 @@
 
     <div class="layout-grid">
         <div class="toggle-container">
-            <span class="toggle-label">Enable Overlay</span>
+            <span class="toggle-label">Overlay <span class="state-text" id="labelOverlay">ON</span></span>
             <label class="switch">
                 <input type="checkbox" id="enableToggle" checked>
                 <span class="slider"></span>
             </label>
         </div>
-
         <div class="toggle-container">
-            <span class="toggle-label">Hover Mode</span>
+            <span class="toggle-label">Hover <span class="state-text" id="labelHover">OFF</span></span>
             <label class="switch">
                 <input type="checkbox" id="hoverToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="toggle-container">
+            <span class="toggle-label">English <span class="state-text" id="labelEnglish">OFF</span></span>
+            <label class="switch">
+                <input type="checkbox" id="englishToggle">
                 <span class="slider"></span>
             </label>
         </div>

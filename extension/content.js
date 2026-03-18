@@ -44,12 +44,17 @@ function updateStyle(fontSize, enabled, hoverMode) {
 let currentFontSize = 14;
 let isPinyinEnabled = true;
 let isHoverMode = false;
+let isEnglishMode = false;
+let isCtrlEPressed = false;
 
-chrome.storage.local.get(['pinyinFontSize', 'pinyinEnabled', 'pinyinHover'], (result) => {
+chrome.storage.local.get(['pinyinFontSize', 'pinyinEnabled', 'pinyinHover', 'englishMode'], (result) => {
     currentFontSize = result.pinyinFontSize || 14;
     isPinyinEnabled = result.pinyinEnabled !== false;
     isHoverMode = result.pinyinHover === true;
+    isEnglishMode = result.englishMode === true;
+    
     updateStyle(currentFontSize, isPinyinEnabled, isHoverMode);
+    if (isEnglishMode) toggleAllEnglish(true);
 });
 document.head.appendChild(style);
 
@@ -64,9 +69,76 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     } else if (request.type === 'TOGGLE_HOVER') {
         isHoverMode = request.hover;
         updateStyle(currentFontSize, isPinyinEnabled, isHoverMode);
+    } else if (request.type === 'TOGGLE_ENGLISH') {
+        isEnglishMode = request.english;
+        toggleAllEnglish(isEnglishMode);
     }
 });
 
+// --- English Translation Logic ---
+
+async function fetchEnglishDefinition(word, rtElement) {
+    if (rtElement.dataset.english) {
+        rtElement.textContent = rtElement.dataset.english;
+        return;
+    }
+
+    // Set a loading state
+    const originalPinyin = rtElement.dataset.pinyin;
+    rtElement.textContent = "...";
+
+    chrome.runtime.sendMessage({ type: 'FETCH_DEFINITION', word: word }, (response) => {
+        if (response && response.definition) {
+            rtElement.dataset.english = response.definition;
+            // Only swap the text if we are STILL in english mode after the fetch returns
+            if (isEnglishMode || isCtrlEPressed) { 
+                rtElement.textContent = response.definition;
+            }
+        } else {
+            rtElement.textContent = originalPinyin; // Revert on error
+        }
+    });
+}
+
+function toggleAllEnglish(forceEnglish) {
+    const rubys = document.querySelectorAll('ruby.learnchinese-ruby');
+    rubys.forEach(ruby => {
+        const rt = ruby.querySelector('rt');
+        if (!rt) return;
+
+        if (forceEnglish) {
+            const word = ruby.dataset.word;
+            fetchEnglishDefinition(word, rt);
+        } else {
+            rt.textContent = rt.dataset.pinyin;
+        }
+    });
+}
+
+// Global Keyboard Listeners for Ctrl+E (Key code 69)
+document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.code === 'KeyE') {
+        e.preventDefault(); // Prevent Chrome search bar stuff
+        if (e.repeat) return; // Ignore holding down multiple fires
+        
+        isCtrlEPressed = true;
+
+        toggleAllEnglish(true);
+    }
+});
+
+document.addEventListener('keyup', (e) => {
+    // We check if Ctrl or E was released to catch the release consistently
+    if (e.code === 'KeyE' || e.key === 'Control') {
+        if (!isCtrlEPressed) return; // Prevent spurious keyups
+        isCtrlEPressed = false;
+
+        // Only revert if the hard toggle isn't on
+        toggleAllEnglish(isEnglishMode); 
+    }
+});
+
+// --- DOM Parsing Logic ---
 const CHINESE_REGEX = /[\u4e00-\u9fa5]/;
 
 
@@ -109,14 +181,23 @@ function replaceNodeWithRuby(textNode, pinyinArray) {
     for (const item of pinyinArray) {
         if (item.pinyin && CHINESE_REGEX.test(item.word)) {
             // It has pinyin, wrap in ruby
+            // We wrap it in a custom class to easily query it later
             const ruby = document.createElement('ruby');
-            ruby.textContent = item.word;
-
+            ruby.className = 'learnchinese-ruby';
+            ruby.dataset.word = item.word; // Store the original word for English fetches
+            
             const rt = document.createElement('rt');
-            rt.textContent = item.pinyin;
+            rt.dataset.pinyin = item.pinyin; // Store the pinyin so we can swap back
+            rt.textContent = isEnglishMode ? "..." : item.pinyin; // Default load state
 
+            ruby.appendChild(document.createTextNode(item.word));
             ruby.appendChild(rt);
             fragment.appendChild(ruby);
+
+            // If English mode is already active, trigger the background fetch
+            if (isEnglishMode) {
+                fetchEnglishDefinition(item.word, rt);
+            }
         } else {
             // No pinyin (or it's just punctuation/english that the rust core couldn't translate), append as normal text
             fragment.appendChild(document.createTextNode(item.word));
