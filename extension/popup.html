@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn Chinese Overlay</title>
+    <style>
+        body {
+            width: 480px; /* Much wider for landscape layout */
+            font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 20px 24px;
+            /* Modern, slightly warm off-white */
+            background: #fdfcfb;
+            color: #1f2937;
+            box-sizing: border-box;
+            border: none;
+        }
+
+        /* Chrome forces its own border if the HTML has padding or background */
+        html {
+            background: transparent;
+            margin: 0;
+            padding: 0;
+            border: none;
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start; /* Moved to left corner */
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0;
+            color: #ef4444; /* Solid China Red */
+            letter-spacing: -0.5px;
+        }
+        
+        .layout-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .toggle-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            background: #f3f4f6;
+            border-radius: 12px;
+            border: none;
+            transition: background 0.2s ease;
+            margin-bottom: 0; /* Remove bottom margin since we are using grid gap */
+        }
+
+        .toggle-container:hover {
+            background: #e5e7eb;
+        }
+
+        .toggle-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 26px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #d1d5db;
+            transition: .4s cubic-bezier(0.4, 0.0, 0.2, 1);
+            border-radius: 26px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s cubic-bezier(0.4, 0.0, 0.2, 1);
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        input:checked + .slider {
+            background: linear-gradient(90deg, #ef4444, #f43f5e);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 16px;
+            background: #f3f4f6;
+            border-radius: 12px;
+            border: none;
+            grid-column: 1 / -1; /* Span the full width of the grid */
+            margin-top: 4px;
+        }
+
+        .control-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #4b5563;
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        input[type="range"] {
+            flex-grow: 1;
+            accent-color: #ef4444;
+            height: 4px;
+            border-radius: 2px;
+            background: #e5e7eb;
+            outline: none;
+            cursor: pointer;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #ef4444;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.4);
+            border: 2px solid white;
+            transition: transform 0.1s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        #size-value {
+            font-size: 13px;
+            font-weight: 700;
+            color: #ef4444;
+            width: 32px;
+            text-align: right;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-group label {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        input[type="range"] {
+            flex-grow: 1;
+            accent-color: #ef4444;
+        }
+
+        #size-value {
+            font-size: 14px;
+            font-weight: bold;
+            color: #4b5563;
+            width: 32px;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>learnchinese</h1>
+    </div>
+
+    <div class="layout-grid">
+        <div class="toggle-container">
+            <span class="toggle-label">Enable Overlay</span>
+            <label class="switch">
+                <input type="checkbox" id="enableToggle" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="toggle-container">
+            <span class="toggle-label">Hover Mode</span>
+            <label class="switch">
+                <input type="checkbox" id="hoverToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="control-group">
+            <label for="fontSizeSlider">Pinyin Size</label>
+            <div class="slider-container">
+                <span style="font-size: 12px">A</span>
+                <input type="range" id="fontSizeSlider" min="10" max="30" value="14" step="1">
+                <span style="font-size: 18px">A</span>
+                <span id="size-value">14px</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

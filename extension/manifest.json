@@ -1,20 +1,29 @@
 {
   "manifest_version": 3,
-  "name": "Pinyin NLP Extension",
+  "name": "learnchinese",
   "version": "0.1.0",
   "description": "Chrome Extension using Rust/Wasm for Pinyin conversion.",
   "permissions": [
     "offscreen",
     "scripting",
-    "activeTab"
+    "activeTab",
+    "storage"
   ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Learn Chinese"
+  },
   "background": {
     "service_worker": "background.js"
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["content.js"]
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ]
     }
   ],
   "content_security_policy": {
