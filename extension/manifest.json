@@ -13,7 +13,8 @@
     "offscreen",
     "scripting",
     "activeTab",
-    "storage"
+    "storage",
+    "tts"
   ],
   "action": {
     "default_popup": "popup.html",

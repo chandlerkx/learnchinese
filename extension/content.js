@@ -45,7 +45,23 @@ let currentFontSize = 14;
 let isPinyinEnabled = true;
 let isHoverMode = false;
 let isEnglishMode = false;
-let isCtrlEPressed = false;
+let isEnglishHoldPressed = false;
+let currentlyHoveredWord = null;
+
+// Track which ruby element we are hovering over for TTS
+document.addEventListener('mouseover', (e) => {
+    const ruby = e.target.closest('ruby.learnchinese-ruby');
+    if (ruby) {
+        currentlyHoveredWord = ruby.dataset.word;
+    }
+});
+
+document.addEventListener('mouseout', (e) => {
+    const ruby = e.target.closest('ruby.learnchinese-ruby');
+    if (ruby && currentlyHoveredWord === ruby.dataset.word) {
+        currentlyHoveredWord = null;
+    }
+});
 
 chrome.storage.local.get(['pinyinFontSize', 'pinyinEnabled', 'pinyinHover', 'englishMode'], (result) => {
     currentFontSize = result.pinyinFontSize || 14;
@@ -91,7 +107,7 @@ async function fetchEnglishDefinition(word, rtElement) {
         if (response && response.definition) {
             rtElement.dataset.english = response.definition;
             // Only swap the text if we are STILL in english mode after the fetch returns
-            if (isEnglishMode || isCtrlEPressed) { 
+            if (isEnglishMode || isEnglishHoldPressed) { 
                 rtElement.textContent = response.definition;
             }
         } else {
@@ -115,23 +131,46 @@ function toggleAllEnglish(forceEnglish) {
     });
 }
 
-// Global Keyboard Listeners for Ctrl+E (Key code 69)
+// Global Keyboard Listeners for Ctrl+E and Ctrl+H
 document.addEventListener('keydown', (e) => {
-    if (e.ctrlKey && e.code === 'KeyE') {
+    // TTS Speak (Ctrl+S)
+    if (e.ctrlKey && !e.shiftKey && e.code === 'KeyS') {
+        e.preventDefault();
+        if (e.repeat) return; // Ignore holding down multiple fires
+
+        if (currentlyHoveredWord) {
+            chrome.runtime.sendMessage({ type: 'SPEAK_TEXT', text: currentlyHoveredWord }).catch(() => {});
+        }
+    }
+
+    // English mode hold (Ctrl+E)
+    if (e.ctrlKey && !e.shiftKey && e.code === 'KeyE') {
         e.preventDefault(); // Prevent Chrome search bar stuff
         if (e.repeat) return; // Ignore holding down multiple fires
         
-        isCtrlEPressed = true;
-
+        isEnglishHoldPressed = true;
         toggleAllEnglish(true);
+    }
+
+    // Hover mode toggle (Ctrl+H)
+    if (e.ctrlKey && !e.shiftKey && e.code === 'KeyH') {
+        e.preventDefault();
+        if (e.repeat) return;
+
+        isHoverMode = !isHoverMode;
+        chrome.storage.local.set({ pinyinHover: isHoverMode });
+        updateStyle(currentFontSize, isPinyinEnabled, isHoverMode);
+        
+        // Broadcast the change to popup if it's open
+        chrome.runtime.sendMessage({ type: 'SYNC_HOVER_MODE', hover: isHoverMode }).catch(() => {});
     }
 });
 
 document.addEventListener('keyup', (e) => {
-    // We check if Ctrl or E was released to catch the release consistently
-    if (e.code === 'KeyE' || e.key === 'Control') {
-        if (!isCtrlEPressed) return; // Prevent spurious keyups
-        isCtrlEPressed = false;
+    // We check if Ctrl, Shift or E was released to catch the release consistently
+    if (e.code === 'KeyE' || e.key === 'Control' || e.key === 'Shift') {
+        if (!isEnglishHoldPressed) return; // Prevent spurious keyups
+        isEnglishHoldPressed = false;
 
         // Only revert if the hard toggle isn't on
         toggleAllEnglish(isEnglishMode); 

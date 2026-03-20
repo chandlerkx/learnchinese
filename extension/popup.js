@@ -3,6 +3,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     const fontSizeSlider = document.getElementById('fontSizeSlider');
     const sizeValue = document.getElementById('size-value');
+    const ttsSpeedSlider = document.getElementById('ttsSpeedSlider');
+    const speedValue = document.getElementById('speed-value');
     const enableToggle = document.getElementById('enableToggle');
     const hoverToggle = document.getElementById('hoverToggle');
     const englishToggle = document.getElementById('englishToggle');
@@ -30,11 +32,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 1. Load the saved states on startup
-    chrome.storage.local.get(['pinyinFontSize', 'pinyinEnabled', 'pinyinHover', 'englishMode'], (result) => {
+    chrome.storage.local.get(['pinyinFontSize', 'pinyinEnabled', 'pinyinHover', 'englishMode', 'ttsSpeed'], (result) => {
         const savedSize = result.pinyinFontSize || 14;
         fontSizeSlider.value = savedSize;
         sizeValue.textContent = savedSize + 'px';
         updateSliderFill(fontSizeSlider);
+        
+        const savedSpeed = result.ttsSpeed || 0.85;
+        ttsSpeedSlider.value = savedSpeed;
+        speedValue.textContent = savedSpeed + 'x';
+        updateSliderFill(ttsSpeedSlider);
         
         const isEnabled = result.pinyinEnabled !== false;
         const isHover = result.pinyinHover === true;
@@ -117,11 +124,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
-    // 5. Listen for background syncs (e.g., if user hits Ctrl+E while popup is open)
+
+    ttsSpeedSlider.addEventListener('input', (event) => {
+        const newSpeed = event.target.value;
+        speedValue.textContent = newSpeed + 'x';
+        updateSliderFill(event.target);
+        chrome.storage.local.set({ ttsSpeed: newSpeed });
+    });
+    // 5. Listen for background syncs (e.g., if user hits hotkeys while popup is open)
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         if (request.type === 'SYNC_ENGLISH_MODE') {
             englishToggle.checked = request.english;
             updateLabelState(labelEnglish, request.english);
+        } else if (request.type === 'SYNC_HOVER_MODE') {
+            hoverToggle.checked = request.hover;
+            updateLabelState(labelHover, request.hover);
         }
     });
 
