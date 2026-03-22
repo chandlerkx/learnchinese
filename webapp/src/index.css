@@ -1,34 +1,39 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;800&display=swap');
-
-:root {
-  --primary: #ef4444;
-  --primary-glow: rgba(239, 68, 68, 0.4);
-  --bg-dark: #0f1115;
-  --bg-card: rgba(30, 33, 40, 0.6);
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-}
-
 * {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
 body {
-  font-family: 'Outfit', -apple-system, sans-serif;
-  background-color: var(--bg-dark);
-  background-image: 
-    radial-gradient(circle at 15% 50%, rgba(239, 68, 68, 0.08), transparent 25%),
-    radial-gradient(circle at 85% 30%, rgba(239, 68, 68, 0.05), transparent 25%);
-  color: var(--text-main);
-  min-height: 100vh;
+  font-family: 'Times New Roman', Times, serif;
+  background-color: white;
+  color: red;
+  margin: 0;
+  padding: 0;
   line-height: 1.5;
-  overflow-x: hidden;
+  font-size: 18px;
 }
 
-.lucide {
-  height: 24px;
-  width: 24px;
-  stroke-width: 2;
+a {
+  color: red;
+  text-decoration: underline;
+}
+
+a:hover {
+  color: darkred;
+}
+
+h1 {
+  font-size: 2.5em;
+  margin-bottom: 0.5em;
+  font-weight: normal;
+}
+
+p {
+  margin-bottom: 1em;
+}
+
+hr {
+  border: 0;
+  border-bottom: 1px dashed red;
+  margin-top: 2em;
+  margin-bottom: 1em;
 }

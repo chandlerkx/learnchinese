@@ -33,7 +33,8 @@ $manifestContent.version = $newVersion
 
 # 4. Save the updated manifest.json
 Write-Host "Updating version from $currentVersion to $newVersion in manifest.json..."
-$manifestContent | ConvertTo-Json -Depth 10 | Set-Content $manifestPath -Encoding UTF8
+$jsonString = $manifestContent | ConvertTo-Json -Depth 10
+[System.IO.File]::WriteAllText("$PWD\$manifestPath", $jsonString, [System.Text.Encoding]::UTF8)
 Write-Host "manifest.json updated successfully."
 
 # 5. Create the 'old' directory if it doesn't exist
