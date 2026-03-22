@@ -48,6 +48,37 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     } else if (request.type === 'FETCH_DEFINITION') {
         fetchDefinition(request.word).then(sendResponse);
         return true; // Keep channel open for async fetch
+    } else if (request.type === 'SPEAK_TEXT') {
+        chrome.storage.local.get({ ttsSpeed: 0.85 }, (result) => {
+            chrome.tts.getVoices((voices) => {
+                let chosenVoiceName = undefined;
+                
+                const zhVoices = voices.filter(v => v.lang && v.lang.toLowerCase().includes('zh'));
+                
+                // Identify a female voice (Ting-Ting is the standard macOS female Chinese voice)
+                const femaleVoice = zhVoices.find(v => {
+                    const name = v.voiceName.toLowerCase();
+                    return name.includes('ting') || name.includes('google 普通话') || name.includes('female');
+                });
+
+                if (femaleVoice) {
+                    chosenVoiceName = femaleVoice.voiceName;
+                }
+
+                const cleanText = request.text.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '').trim();
+                
+                if (cleanText) {
+                    chrome.tts.stop(); // Stop any currently playing audio so it doesn't overlap
+                    chrome.tts.speak(cleanText, { 
+                        lang: 'zh-CN', 
+                        rate: parseFloat(result.ttsSpeed),
+                        pitch: 1.2,
+                        voiceName: chosenVoiceName
+                    });
+                }
+            });
+        });
+        return false;
     }
 });
 
