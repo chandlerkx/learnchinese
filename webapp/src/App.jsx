@@ -1,7 +1,18 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 
 function App() {
+  const [views, setViews] = useState('...');
+
+  useEffect(() => {
+    fetch('/api/views')
+      .then(res => res.json())
+      .then(data => {
+        if (data.views) setViews(data.views);
+      })
+      .catch(err => console.error('Failed to fetch views:', err));
+  }, []);
+
   return (
     <div className="retro-container">
       <h1>learnchinese</h1>
@@ -14,12 +25,12 @@ function App() {
       
       <p>
         <a href="https://docs.google.com/forms/d/e/1FAIpQLSdnJrv-bhL8CAecI_rPr3lme_MgmWL3NHK2bl3fNDdWI9J00w/viewform?usp=header" target="_blank" rel="noopener noreferrer">
-          https://docs.google.com/forms/d/e/1FAIpQLSdnJrv-bhL8CAecI_rPr3lme_MgmWL3NHK2bl3fNDdWI9J00w/viewform?usp=header 
+          Feedback Form
         </a>
       </p>
       
       <hr />
-      <small>Made for Chrome Web Store.</small>
+      <small>Page Views: {views} | Made for Chrome Web Store.</small>
     </div>
   );
 }
