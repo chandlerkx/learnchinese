@@ -2,14 +2,17 @@ import { createClient } from 'redis';
 
 export default async function handler(request, response) {
   try {
+    // Vercel marketplace sometimes prefixes variables with STORAGE_ or REDIS_ depending on your selection
+    const redisUrl = process.env.REDIS_URL || process.env.STORAGE_URL || process.env.KV_URL;
+
     // If running locally without env variables, just return fallback
-    if (!process.env.REDIS_URL) {
+    if (!redisUrl) {
       return response.status(200).json({ views: '...' });
     }
 
-    // Connect using exactly the REDIS_URL provided by the Vercel Dashboard
+    // Connect using the URL provided by the Vercel Dashboard
     const client = createClient({
-      url: process.env.REDIS_URL
+      url: redisUrl
     });
 
     client.on('error', err => console.error('Redis Connection Error:', err));
