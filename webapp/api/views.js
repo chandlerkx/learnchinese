@@ -1,14 +1,26 @@
-import { kv } from '@vercel/kv';
+import { createClient } from 'redis';
 
 export default async function handler(request, response) {
   try {
-    // Increment the 'page_views' key in Vercel KV Redis database by 1
-    const views = await kv.incr('page_views');
-    
-    // Return the new total view count
+    // If running locally without env variables, just return fallback
+    if (!process.env.REDIS_URL) {
+      return response.status(200).json({ views: '...' });
+    }
+
+    // Connect using exactly the REDIS_URL provided by the Vercel Dashboard
+    const client = createClient({
+      url: process.env.REDIS_URL
+    });
+
+    client.on('error', err => console.error('Redis Connection Error:', err));
+    await client.connect();
+
+    const views = await client.incr('page_views');
+    await client.disconnect();
+
     return response.status(200).json({ views });
   } catch (error) {
-    console.error('KV Error:', error);
+    console.error('Redis Execution Error:', error);
     return response.status(500).json({ error: 'Failed to fetch views', views: 0 });
   }
 }
