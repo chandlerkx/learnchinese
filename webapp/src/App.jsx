@@ -5,10 +5,23 @@ function App() {
   const [views, setViews] = useState('...');
 
   useEffect(() => {
-    fetch('/api/views')
+    // Use your browser's local cache to check if you've already triggered a new view count
+    const hasVisited = localStorage.getItem('has_viewed_learnchinese');
+    
+    // Provide a query parameter to securely restrict the database from incrementing on every reload
+    const endpoint = hasVisited ? '/api/views' : '/api/views?inc=true';
+
+    fetch(endpoint)
       .then(res => res.json())
       .then(data => {
-        if (data.views) setViews(data.views);
+        if (data.views !== undefined) {
+          setViews(data.views);
+          
+          // Once the database properly fires off a new view tracking point, lock it down in the browser
+          if (!hasVisited && typeof data.views === 'number') {
+            localStorage.setItem('has_viewed_learnchinese', 'true');
+          }
+        }
       })
       .catch(err => console.error('Failed to fetch views:', err));
   }, []);

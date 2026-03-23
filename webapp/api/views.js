@@ -18,7 +18,16 @@ export default async function handler(request, response) {
     client.on('error', err => console.error('Redis Connection Error:', err));
     await client.connect();
 
-    const views = await client.incr('page_views');
+    let views;
+    
+    // Only add a new view if the URL contains ?inc=true, otherwise just peek at the current count
+    if (request.url && request.url.includes('inc=true')) {
+      views = await client.incr('page_views');
+    } else {
+      views = await client.get('page_views');
+      views = views ? parseInt(views, 10) : 0;
+    }
+    
     await client.disconnect();
 
     return response.status(200).json({ views });
