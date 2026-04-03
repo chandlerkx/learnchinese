@@ -54,8 +54,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 let chosenVoiceName = undefined;
                 
                 const zhVoices = voices.filter(v => v.lang && v.lang.toLowerCase().includes('zh'));
+                console.log('Available Chinese voices:', zhVoices.map(v => `${v.voiceName} (${v.lang})`));
                 
-                // Identify a female voice (Ting-Ting is the standard macOS female Chinese voice)
                 const femaleVoice = zhVoices.find(v => {
                     const name = v.voiceName.toLowerCase();
                     return name.includes('ting') || name.includes('google 普通话') || name.includes('female');
@@ -68,7 +68,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 const cleanText = request.text.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '').trim();
                 
                 if (cleanText) {
-                    chrome.tts.stop(); // Stop any currently playing audio so it doesn't overlap
+                    chrome.tts.stop();
                     chrome.tts.speak(cleanText, { 
                         lang: 'zh-CN', 
                         rate: parseFloat(result.ttsSpeed),
