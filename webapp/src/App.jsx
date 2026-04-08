@@ -34,6 +34,8 @@ function App() {
 
       <p>There are three hotkeys to make this app more accessible. Hover over text and hit <b>Ctrl + S</b> to hear what the characters sound like, <b>Ctrl + E</b> to turn Pinyin to English, and <b>Ctrl + H</b> to toggle hover mode.</p>
 
+      <p>Also, if you're new to Chinese (like me), feel free to check out this <a href="https://studycli.org/pinyin-chart/" target="_blank" rel="noopener noreferrer">pinyin chart</a>.</p>
+
       <p>After installing, try if it works right here: <span style={{ color: "black", fontWeight: "bold" }}>你好</span></p>
 
       <p>Btw, you may need to refresh/click on the page if switching between tabs :p</p>
@@ -43,6 +45,11 @@ function App() {
       <p>
         <a href="https://docs.google.com/forms/d/e/1FAIpQLSdnJrv-bhL8CAecI_rPr3lme_MgmWL3NHK2bl3fNDdWI9J00w/viewform?usp=header" target="_blank" rel="noopener noreferrer">
           Feedback Form
+        </a>
+      </p>
+      <p>
+        <a href="https://chromewebstore.google.com/detail/learnchinese/cnnjcobmpnjngjingphnfjengikepdnb" target="_blank" rel="noopener noreferrer">
+          Rate or install the extension
         </a>
       </p>
 
