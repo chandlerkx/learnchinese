@@ -12,7 +12,7 @@ A Chrome extension that overlays **pinyin annotations** on any Chinese webpage, 
 - **Smart Word Segmentation** — A Rust-based NLP engine segments Chinese text into meaningful words, not individual characters
 - **English Definitions** — Hold `Ctrl+E` to toggle English translations via Google Translate
 - **Text-to-Speech** — Hold `Ctrl+S` and hover over words to hear native pronunciation
-- **Hover Mode** — Toggle with `Ctrl+Shift+H` to show pinyin only on hover
+- **Hover Mode** — Toggle with `Ctrl+H` to show pinyin only on hover
 - **Customizable** — Adjust font size, toggle pinyin/definitions via the popup UI
 
 ## How It Works
