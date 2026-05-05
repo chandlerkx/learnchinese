@@ -1,43 +1,61 @@
+//! # rust-core — Chinese NLP Engine (Wasm)
+//!
+//! A WebAssembly-compiled Chinese text processing engine that provides
+//! word segmentation and pinyin annotation for the LearnChinese Chrome Extension.
+//!
+//! ## Architecture
+//!
+//! The crate is structured as follows:
+//!
+//! - [`types`] — Shared data types (`WordPinyin`)
+//! - [`unicode`] — CJK character detection and mixed-content splitting
+//! - [`segmenter`] — Jieba-based word segmentation and pinyin generation
+//!
+//! ## Wasm API
+//!
+//! Two functions are exported to JavaScript via `wasm-bindgen`:
+//!
+//! - [`rust_ping`] — Health check (returns `"pong"`)
+//! - [`get_pinyin_for_text`] — Main NLP entry point
+
+pub mod types;
+pub mod unicode;
+pub mod segmenter;
+
 use wasm_bindgen::prelude::*;
-use serde::{Serialize, Deserialize};
-use pinyin::ToPinyin;
+use crate::segmenter::segment_and_annotate;
 
-#[derive(Serialize, Deserialize)]
-pub struct WordPinyin {
-    pub word: String,
-    pub pinyin: Option<String>,
-}
-
+/// Health-check endpoint for verifying the Wasm bridge is operational.
+///
+/// Called by `offscreen.js` during extension startup to confirm the
+/// Service Worker → Offscreen Document → Wasm pipeline is functional.
+///
+/// # Returns
+///
+/// The string `"pong"`.
 #[wasm_bindgen]
 pub fn rust_ping() -> String {
     "pong".to_string()
 }
 
+/// Main NLP entry point: segments Chinese text and returns pinyin annotations.
+///
+/// Accepts mixed Chinese/English/punctuation input and returns a serialized
+/// `Vec<WordPinyin>` as a `JsValue` for consumption by JavaScript.
+///
+/// # Pipeline
+///
+/// 1. **Split** — Partitions input into Chinese vs non-Chinese runs
+/// 2. **Segment** — Feeds Chinese runs through jieba (349K-word dictionary + HMM)
+/// 3. **Annotate** — Generates tone-marked pinyin for each segmented word
+/// 4. **Passthrough** — Non-Chinese runs receive `pinyin: null`
+///
+/// # Panics
+///
+/// Panics if `serde_wasm_bindgen` serialization fails (should not occur
+/// with valid `WordPinyin` data).
 #[wasm_bindgen]
 pub fn get_pinyin_for_text(text: &str) -> JsValue {
-    // Fallback: simple segmentation by spaces or characters since jieba-rs failed to compile for wasm
-    // The user can choose a different segmentation strategy later.
-    let words = text.split_whitespace(); // Simple split
-    
-    let mut result: Vec<WordPinyin> = Vec::new();
-    
-    for word in words {
-         let pinyin_converted = word.chars()
-            .map(|c| {
-                if let Some(p) = c.to_pinyin() {
-                    p.with_tone().to_string()
-                } else {
-                    c.to_string()
-                }
-            })
-            .collect::<Vec<String>>()
-            .join(" ");
-
-        result.push(WordPinyin {
-            word: word.to_string(),
-            pinyin: Some(pinyin_converted),
-        });
-    }
-
-    serde_wasm_bindgen::to_value(&result).unwrap()
+    let result = segment_and_annotate(text);
+    serde_wasm_bindgen::to_value(&result).expect("Failed to serialize WordPinyin result")
 }

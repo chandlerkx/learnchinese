@@ -1,6 +1,22 @@
 /* @ts-self-types="./rust_core.d.ts" */
 
 /**
+ * Main NLP entry point: segments Chinese text and returns pinyin annotations.
+ *
+ * Accepts mixed Chinese/English/punctuation input and returns a serialized
+ * `Vec<WordPinyin>` as a `JsValue` for consumption by JavaScript.
+ *
+ * # Pipeline
+ *
+ * 1. **Split** — Partitions input into Chinese vs non-Chinese runs
+ * 2. **Segment** — Feeds Chinese runs through jieba (349K-word dictionary + HMM)
+ * 3. **Annotate** — Generates tone-marked pinyin for each segmented word
+ * 4. **Passthrough** — Non-Chinese runs receive `pinyin: null`
+ *
+ * # Panics
+ *
+ * Panics if `serde_wasm_bindgen` serialization fails (should not occur
+ * with valid `WordPinyin` data).
  * @param {string} text
  * @returns {any}
  */
@@ -12,6 +28,14 @@ export function get_pinyin_for_text(text) {
 }
 
 /**
+ * Health-check endpoint for verifying the Wasm bridge is operational.
+ *
+ * Called by `offscreen.js` during extension startup to confirm the
+ * Service Worker → Offscreen Document → Wasm pipeline is functional.
+ *
+ * # Returns
+ *
+ * The string `"pong"`.
  * @returns {string}
  */
 export function rust_ping() {

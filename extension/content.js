@@ -242,8 +242,7 @@ function replaceNodeWithRuby(textNode, pinyinArray) {
             fragment.appendChild(document.createTextNode(item.word));
         }
 
-        // Add a space after the word since our rust core split by whitespace and consumed the spaces
-        fragment.appendChild(document.createTextNode(" "));
+        // Note: spaces/punctuation are preserved by the segmenter as separate non-Chinese segments
     }
 
     // Replace the original text node

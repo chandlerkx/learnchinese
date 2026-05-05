@@ -1,0 +1,15 @@
+# Rust build artifacts
+rust-core/target/
+rust-core/dict.txt
+
+# Node modules
+node_modules/
+
+# Wasm build intermediates (final output is in extension/)
+rust-core/pkg/
+
+# OS files
+.DS_Store
+
+# Environment
+.env

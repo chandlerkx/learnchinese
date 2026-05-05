@@ -1,6 +1,15 @@
 #!/bin/bash
 set -e
 
+# Download jieba dictionary if not present (~5MB, simplified Chinese, 349K entries)
+if [ ! -f rust-core/dict.txt ]; then
+    echo "Downloading jieba dictionary..."
+    curl -L -o rust-core/dict.txt https://github.com/fxsjy/jieba/raw/master/jieba/dict.txt
+    echo "Dictionary downloaded."
+else
+    echo "Dictionary already exists, skipping download."
+fi
+
 echo "Building Rust Core..."
 cd rust-core
 wasm-pack build --target web --out-name rust_core --out-dir pkg
