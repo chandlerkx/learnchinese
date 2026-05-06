@@ -21,8 +21,8 @@ use crate::types::WordPinyin;
 use crate::unicode::{contains_chinese, split_mixed_content};
 
 /// The raw jieba dictionary, embedded at compile time.
-///
-/// Format: one entry per line — `word frequency part_of_speech`.
+
+/// Format: one entry per line — `word | frequency | part_of_speech (noun, verb, measurement/numeral, etc)`.
 static DICT: &str = include_str!("../dict.txt");
 
 /// Lazily-initialized jieba segmenter instance.
@@ -69,14 +69,14 @@ pub(crate) static JIEBA: Lazy<Jieba> = Lazy::new(|| {
 /// assert!(result[1].pinyin.is_some());
 /// ```
 pub fn segment_and_annotate(text: &str) -> Vec<WordPinyin> {
-    let segments = split_mixed_content(text);
+    let segments = split_mixed_content(text); // stage 1: split mixed content
     let mut result: Vec<WordPinyin> = Vec::new();
 
     for segment in segments {
         if contains_chinese(&segment) {
-            let words = JIEBA.cut(&segment, false);
-            for word in words {
-                let pinyin_str = generate_pinyin(word);
+            let words = JIEBA.cut(&segment, false); // stage 2: segment Chinese words 
+            for word in words { // stage 3: generate pinyin for each word
+                let pinyin_str = generate_pinyin(word); 
                 result.push(WordPinyin {
                     word: word.to_string(),
                     pinyin: Some(pinyin_str),
@@ -107,8 +107,8 @@ pub fn segment_and_annotate(text: &str) -> Vec<WordPinyin> {
 /// ```
 pub fn generate_pinyin(word: &str) -> String {
     word.chars()
-        .map(|c| match c.to_pinyin() {
-            Some(p) => p.with_tone().to_string(),
+        .map(|c| match c.to_pinyin() { // converts character to pinyin object e.g. {syllable: "ni", tone: 3}
+            Some(p) => p.with_tone().to_string(), 
             None => c.to_string(),
         })
         .collect::<Vec<String>>()

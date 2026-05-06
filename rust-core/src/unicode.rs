@@ -7,9 +7,9 @@
 /// Returns `true` if the character falls within a CJK Unified Ideographs range.
 ///
 /// Covers the following Unicode blocks:
-/// - CJK Unified Ideographs (U+4E00..U+9FFF) — most common Chinese characters
-/// - CJK Extension A (U+3400..U+4DBF) — rare/historical characters
-/// - CJK Compatibility Ideographs (U+F900..U+FAFF) — duplicate mappings
+/// - CJK Unified Ideographs (U+4E00..U+9FFF) — most common Chinese characters (~99%+)
+/// - CJK Extension A (U+3400..U+4DBF) — rare/historical characters (<1%)
+/// - CJK Compatibility Ideographs (U+F900..U+FAFF) — duplicate mappings (<1%)
 ///
 /// # Examples
 ///
@@ -20,7 +20,7 @@
 /// assert!(!is_chinese_char('A'));
 /// assert!(!is_chinese_char('！')); // fullwidth punctuation is NOT CJK
 /// ```
-pub fn is_chinese_char(c: char) -> bool {
+pub fn is_chinese_char(c: char) -> bool { //when would there be false positives? is there any other way to do this
     matches!(c,
         '\u{4e00}'..='\u{9fff}'  |  // CJK Unified Ideographs
         '\u{3400}'..='\u{4dbf}'  |  // CJK Extension A
@@ -66,7 +66,7 @@ pub fn contains_chinese(s: &str) -> bool {
 /// let result = split_mixed_content("纯中文");
 /// assert_eq!(result, vec!["纯中文"]);
 /// ```
-pub fn split_mixed_content(text: &str) -> Vec<String> {
+pub fn split_mixed_content(text: &str) -> Vec<String> { // Hello你好World --> ["Hello", "你好", "World"]
     let mut segments: Vec<String> = Vec::new();
     let mut current = String::new();
     let mut in_chinese = false;
@@ -82,7 +82,7 @@ pub fn split_mixed_content(text: &str) -> Vec<String> {
 
         if char_is_chinese != in_chinese {
             if !current.is_empty() {
-                segments.push(std::mem::take(&mut current));
+                segments.push(std::mem::take(&mut current)); //take() pushes current into segments and resets current to empty in one step
             }
             in_chinese = char_is_chinese;
         }

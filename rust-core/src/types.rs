@@ -3,7 +3,7 @@
 //! Contains the core structures used to represent segmented Chinese text
 //! and its corresponding pinyin annotations.
 
-use serde::{Deserialize, Serialize};
+use serde::Serialize;   
 
 /// A single word paired with its optional pinyin reading.
 ///
@@ -27,7 +27,7 @@ use serde::{Deserialize, Serialize};
 ///     pinyin: None,
 /// };
 /// ```
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, PartialEq, Serialize)]
 pub struct WordPinyin {
     /// The original text segment (Chinese word or non-Chinese run).
     pub word: String,
